@@ -20,23 +20,42 @@ function submitIssue(e) {
   fetchIssues();
   e.preventDefault();
 }
-
+let solveIssue = 0;
 const closeIssue = id => {
+  
   const issues = JSON.parse(localStorage.getItem('issues'));
   const currentIssue = issues.find(issue => issue.id === id);
   currentIssue.status = 'Closed';
+ currentIssue.description =  currentIssue.description.strike();
+
+  solveIssue++;
+  const solveIssueElement = document.getElementById("solve-issue-count");
+  solveIssueElement.style.color ="green";
+  solveIssueElement.innerText = solveIssue;
   localStorage.setItem('issues', JSON.stringify(issues));
-  fetchIssues();
+  fetchIssues()
 }
 
 const deleteIssue = id => {
   const issues = JSON.parse(localStorage.getItem('issues'));
-  const remainingIssues = issues.filter( issue.id !== id )
+  const remainingIssues = issues.filter( issue => issue.id !== id )
+  if(solveIssue > 0){
+    solveIssue--;
+  const solveIssueElement = document.getElementById("solve-issue-count");
+  solveIssueElement.style.color ="green";
+  solveIssueElement.innerText = solveIssue;
+  }
+  
+  
   localStorage.setItem('issues', JSON.stringify(remainingIssues));
+  fetchIssues();
 }
 
 const fetchIssues = () => {
   const issues = JSON.parse(localStorage.getItem('issues'));
+  const issueCount = document.getElementById("issue-count");
+  issueCount.style.color="red";
+  issueCount.innerText = ` (${issues.length})` ;
   const issuesList = document.getElementById('issuesList');
   issuesList.innerHTML = '';
 
@@ -46,11 +65,13 @@ const fetchIssues = () => {
     issuesList.innerHTML +=   `<div class="well">
                               <h6>Issue ID: ${id} </h6>
                               <p><span class="label label-info"> ${status} </span></p>
-                              <h3> ${description} </h3>
+                              <h3 > ${description} </h3>
                               <p><span class="glyphicon glyphicon-time"></span> ${severity}</p>
                               <p><span class="glyphicon glyphicon-user"></span> ${assignedTo}</p>
-                              <a href="#" onclick="setStatusClosed(${id})" class="btn btn-warning">Close</a>
-                              <a href="#" onclick="deleteIssue(${id})" class="btn btn-danger">Delete</a>
+                              <a href="#" onclick="closeIssue('${id}')" class="btn btn-warning">Close</a>
+                              <a href="#" onclick="deleteIssue('${id}')" class="btn btn-danger">Delete</a>
                               </div>`;
   }
+
+
 }
